@@ -43,3 +43,37 @@
 button {
     margin-right: 2rem;
 }
+
+.timeline {
+    display: flex;
+    justify-content: center;
+}
+
+.timeline input {
+    display: none;
+}
+
+.timeline input + label {
+    margin-right: 1rem;
+}
+
+.timeline label {
+    color: white;
+    font-size: 1.5rem;
+    border: none;
+    padding: 0.4rem 0.6rem;
+    border-radius: 25%;
+}
+
+input[type="radio"]:checked + label {
+    background-color: #73c49f;
+}
+
+.timeline label:hover {
+    background-color: #73c49f;
+    opacity: 0.8;
+}
+
+.timeline label:active {
+    opacity: 0.5;
+}
