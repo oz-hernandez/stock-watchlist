@@ -2,29 +2,42 @@ import {useEffect, useState} from 'react'
 import Plot from 'react-plotly.js';
 import '../App.css';
 
-type dates = string[];
-type data = number[];
-
-export default function Stocks() {
-    const [dateData, setDateData] = useState<dates>();
-    const [stockHighData, setStockHighData] = useState<data>();
-    const [loading, setLoading] = useState(true);
+export default function Stocks({ timeline }: { timeline: number }) {
+    const [dateData, setDateData] = useState<string[]>();
+    const [stockHighData, setStockHighData] = useState<number[]>();
 
     useEffect(() => {
         let isMounted = true;
         async function fetchData() {
-            setLoading(true);
             try {
-                let result : any = await fetch('/data.json').then(res => res.json());
-                result = result["Monthly Adjusted Time Series"];
+                let year = (new Date().getFullYear() - timeline).toString();
+                console.log(year);
+                let result : any = await fetch('/appleTestData.json').then(res => res.json());
+                result = result["Time Series (Daily)"];
 
-                let datesData: dates = [];
-                let stockData: data = [];
-                Object.keys(result).forEach(key => {
-                    datesData.push(key);
-                    stockData.push(result[key]["2. high"]);
+                let datesData: string[] = [];
+                let stockData: number[] = [];
+                let filteredData: string[];
+
+                let currentDate = new Date();
+                // debug
+                // console.log(currentDate);
+                let startYearRange = new Date();
+                startYearRange.setFullYear(currentDate.getFullYear() - timeline);
+
+                filteredData = Object.keys(result).filter(dates => {
+                    const date = new Date(dates);
+                    // debug
+                    // console.log(date);
+                    return date >= startYearRange && date <= currentDate;
                 });
 
+                console.log(filteredData);
+
+                filteredData.forEach( val => {
+                    datesData.push(val);
+                    stockData.push(result[val]["2. high"]);
+                });
 
                 if(isMounted) {
                     setStockHighData(stockData);
@@ -32,13 +45,11 @@ export default function Stocks() {
                 }
             } catch(error) {
                 console.log("Error fetching", error);
-            } finally {
-                if(isMounted) setLoading(false);
             }
         }
         fetchData();
         return () => { isMounted = false; };
-    }, []);
+    }, [timeline]);
 
     return (
         <Plot
@@ -47,7 +58,7 @@ export default function Stocks() {
                     x: dateData,
                     y: stockHighData,
                     type: 'scatter',
-                    name: 'IBM High',
+                    name: 'Apple High',
                     mode: 'lines',
                     marker: {color: 'teal'},
                     line: { color: "73c49f", width: 3 },
